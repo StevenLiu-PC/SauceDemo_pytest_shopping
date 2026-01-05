@@ -1,0 +1,42 @@
+name: ui-tests
+
+on:                             # 不用手動按開始，系統自己跑測試
+  push:
+  pull_request:
+
+jobs:                     # 工作清單
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:                     # 把GitHub repo 的程式碼「下載」到這台 CI 機器上。
+      - name: Checkout repo
+        uses: actions/checkout@v5     # v5
+
+      - name: Setup Python          # 裝 Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies     # requirements.txt 寫什麼，CI 就裝什麼
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r requirements.txt
+
+      - name: Setup Chrome            # 安裝 Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Run smoke tests + HTML report    # 跑 smoke + 產報告
+        env:
+          CI: "true"
+        run: |
+          mkdir -p reports/screenshots         # 確保 reports/screenshots 一定存在
+          python -m pytest -m smoke -q --html=reports/smoke.html --self-contained-html
+
+      - name: Upload report artifact     # 把報告打包上傳
+        if: always()
+        uses: actions/upload-artifact@v6       # v6
+        with:
+          name: smoke-report
+          path: reports/**                     # 把 reports 底下所有東西都上傳（含 screenshots）

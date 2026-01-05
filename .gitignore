@@ -9,8 +9,8 @@ venv/
 
 # ---- Test reports & artifacts ----
 reports/
-*.html
-*.png
+reports/**/*.html
+reports/**/*.png
 
 # ---- VS Code ----
 .vscode/

@@ -2,6 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+import os 
 
 
 class CartPage:
@@ -53,5 +54,6 @@ class CartPage:
             """ 如果等不到：做 debug 訊息 + 截圖 + 把錯誤丟回去 """
         except TimeoutException:
             print("DEBUG click_checkout failed, current url =", self.driver.current_url)
+            os.makedirs("reports/screenshots", exist_ok=True)
             self.driver.save_screenshot("debug_click_checkout_timeout.png")
             raise
