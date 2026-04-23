@@ -1,35 +1,42 @@
-# tests/test_login.py
+import pytest
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
 from pages.login_page import LoginPage
 
 
-class TestLogin:
-    """
-    SauceDemo 登入測試：
-    - 正確帳密 → 登入成功
-    - 密碼錯誤 → 顯示錯誤訊息
-    """
+@pytest.mark.parametrize(
+    "username,password,expected_error",
+    [
+        ("standard_user", "wrong_password", "Username and password do not match"),
+        ("", "secret_sauce", "Username is required"),
+        ("standard_user", "", "Password is required"),
+        ("", "", "Username is required"),
+        ("locked_out_user", "secret_sauce", "Sorry, this user has been locked out"),
+    ],
+    ids=[
+        "wrong_password",
+        "empty_username",
+        "empty_password",
+        "empty_both",
+        "locked_out_user",
+    ],
+)
+def test_login_negative_cases(browser, username, password, expected_error):
+    """登入負向案例矩陣"""
+    login = LoginPage(browser)
+    login.open()
+    login.login(username, password)
 
-    def test_login_success_standard_user(self, browser):
-        """使用 standard_user / secret_sauce 應該登入成功"""
-        page = LoginPage(browser)
-        page.open()
-        page.login("standard_user", "secret_sauce")
+    msg = login.get_error_text()
+    assert expected_error in msg
 
-        # 成功登入後網址會包含 /inventory.html
-        WebDriverWait(browser, 10).until(
-            EC.url_contains("/inventory.html")
-        )
-        assert "/inventory.html" in browser.current_url
 
-    def test_login_wrong_password(self, browser):
-        """帳號對、密碼錯 → 應該顯示錯誤訊息"""
-        page = LoginPage(browser)
-        page.open()
-        page.login("standard_user", "wrong")
+def test_login_success_standard_user(browser):
+    """成功登入 standard_user 後進入 inventory 頁"""
+    login = LoginPage(browser)
+    login.open()
+    login.login("standard_user", "secret_sauce")
 
-        error_text = page.get_error_text().lower()
-        # 真正錯誤訊息開一看就知道，可以再調整這裡的字串
-        assert "epic sadface" in error_text or "do not match" in error_text
-
+    WebDriverWait(browser, 10).until(EC.url_contains("inventory.html"))
+    assert "inventory.html" in browser.current_url

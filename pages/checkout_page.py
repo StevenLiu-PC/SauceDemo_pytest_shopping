@@ -87,3 +87,4 @@ class CheckoutPage:
         """拿錯誤訊息（沒有就回空字串）"""
         elements = self.driver.find_elements(*self.ERROR_MESSAGE)
         return elements[0].text.strip() if elements else ""
+    

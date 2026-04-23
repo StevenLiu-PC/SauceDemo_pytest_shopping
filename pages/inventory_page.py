@@ -25,6 +25,9 @@ class InventoryPage:
     ADD_TO_CART_BUTTONS = (By.CSS_SELECTOR, "button.btn_inventory")
 
     SORT_SELECT = (By.CLASS_NAME, "product_sort_container")
+
+
+    
     def __init__(self, driver):
         self.driver = driver
         self.wait = WebDriverWait(driver, 10)
